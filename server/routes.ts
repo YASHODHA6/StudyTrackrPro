@@ -169,14 +169,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/report", async (req, res) => {
     try {
       const format = req.query.format as string || "json";
-      const sessions = await storage.getAllStudySessions();
+      const startDate = req.query.startDate as string | undefined;
+      const endDate = req.query.endDate as string | undefined;
+      
+      let sessions = await storage.getAllStudySessions();
+      
+      // Filter by date range if provided
+      if (startDate) {
+        sessions = sessions.filter(s => s.date >= startDate);
+      }
+      if (endDate) {
+        sessions = sessions.filter(s => s.date <= endDate);
+      }
+      
       const stats = await storage.getStudyStats();
 
-      if (format === "txt") {
+      if (format === "csv") {
+        // Generate CSV report
+        let csv = "Subject,Hours,Date\n";
+        sessions.forEach((session) => {
+          csv += `"${session.subject}",${session.hours},${session.date}\n`;
+        });
+
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=study-report.csv");
+        res.send(csv);
+      } else if (format === "txt") {
         // Generate text report
         let report = "=".repeat(60) + "\n";
         report += "           STUDENT STUDY TRACKER - REPORT\n";
         report += "=".repeat(60) + "\n\n";
+        
+        if (startDate || endDate) {
+          report += "DATE RANGE\n";
+          report += "-".repeat(60) + "\n";
+          if (startDate) report += `From: ${startDate}\n`;
+          if (endDate) report += `To: ${endDate}\n`;
+          report += "\n";
+        }
         
         report += "STATISTICS\n";
         report += "-".repeat(60) + "\n";
@@ -207,6 +237,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // JSON format
         const report = {
           generatedAt: new Date().toISOString(),
+          dateRange: {
+            startDate: startDate || null,
+            endDate: endDate || null,
+          },
           statistics: stats,
           sessions: sessions,
         };

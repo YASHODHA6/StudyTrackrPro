@@ -144,32 +144,87 @@ export default function Home() {
             <Card className="mx-auto max-w-2xl">
               <CardHeader>
                 <CardTitle>Download Study Report</CardTitle>
-                <CardDescription>Export your study data for analysis</CardDescription>
+                <CardDescription>Export your study data with optional date filtering</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Download a comprehensive report of all your study sessions, including statistics and subject breakdown.
-                </p>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href="/api/report?format=json"
-                    download="study-report.json"
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover-elevate active-elevate-2"
-                    data-testid="button-download-json"
-                  >
-                    <FileDown className="h-4 w-4" />
-                    Download JSON
-                  </a>
-                  <a
-                    href="/api/report?format=txt"
-                    download="study-report.txt"
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-secondary px-6 text-sm font-medium text-secondary-foreground hover-elevate active-elevate-2"
-                    data-testid="button-download-txt"
-                  >
-                    <FileDown className="h-4 w-4" />
-                    Download TXT
-                  </a>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <label className="text-sm font-medium">Date Range (Optional)</label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Start Date</label>
+                      <input
+                        type="date"
+                        id="report-start-date"
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                        data-testid="input-report-start-date"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">End Date</label>
+                      <input
+                        type="date"
+                        id="report-end-date"
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                        data-testid="input-report-end-date"
+                      />
+                    </div>
+                  </div>
                 </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-medium">Export Format</label>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <button
+                      onClick={() => {
+                        const startDate = (document.getElementById('report-start-date') as HTMLInputElement)?.value;
+                        const endDate = (document.getElementById('report-end-date') as HTMLInputElement)?.value;
+                        let url = '/api/report?format=json';
+                        if (startDate) url += `&startDate=${startDate}`;
+                        if (endDate) url += `&endDate=${endDate}`;
+                        window.location.href = url;
+                      }}
+                      className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover-elevate active-elevate-2"
+                      data-testid="button-download-json"
+                    >
+                      <FileDown className="h-4 w-4" />
+                      JSON
+                    </button>
+                    <button
+                      onClick={() => {
+                        const startDate = (document.getElementById('report-start-date') as HTMLInputElement)?.value;
+                        const endDate = (document.getElementById('report-end-date') as HTMLInputElement)?.value;
+                        let url = '/api/report?format=txt';
+                        if (startDate) url += `&startDate=${startDate}`;
+                        if (endDate) url += `&endDate=${endDate}`;
+                        window.location.href = url;
+                      }}
+                      className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-secondary px-4 text-sm font-medium text-secondary-foreground hover-elevate active-elevate-2"
+                      data-testid="button-download-txt"
+                    >
+                      <FileDown className="h-4 w-4" />
+                      TXT
+                    </button>
+                    <button
+                      onClick={() => {
+                        const startDate = (document.getElementById('report-start-date') as HTMLInputElement)?.value;
+                        const endDate = (document.getElementById('report-end-date') as HTMLInputElement)?.value;
+                        let url = '/api/report?format=csv';
+                        if (startDate) url += `&startDate=${startDate}`;
+                        if (endDate) url += `&endDate=${endDate}`;
+                        window.location.href = url;
+                      }}
+                      className="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground hover-elevate active-elevate-2"
+                      data-testid="button-download-csv"
+                    >
+                      <FileDown className="h-4 w-4" />
+                      CSV
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  Reports include all study sessions within the selected date range (or all sessions if no dates are selected).
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
