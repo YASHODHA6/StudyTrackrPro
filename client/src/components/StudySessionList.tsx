@@ -1,7 +1,13 @@
-import { BookOpen, Calendar, Clock } from "lucide-react";
+import { useState } from "react";
+import { BookOpen, Calendar, Clock, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { useMutation } from "@tanstack/react-query";
 import type { StudySession } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EditStudySessionDialog } from "@/components/EditStudySessionDialog";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface StudySessionListProps {
   sessions: StudySession[];
@@ -10,6 +16,35 @@ interface StudySessionListProps {
 }
 
 export function StudySessionList({ sessions, isLoading, compact = false }: StudySessionListProps) {
+  const { toast } = useToast();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/study/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/study"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({
+        title: "Study session deleted",
+        description: "The study session has been removed.",
+      });
+      setDeletingId(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete study session. Please try again.",
+        variant: "destructive",
+      });
+      setDeletingId(null);
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    setDeletingId(id);
+    deleteMutation.mutate(id);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -44,7 +79,7 @@ export function StudySessionList({ sessions, isLoading, compact = false }: Study
       {sessions.map((session) => (
         <div
           key={session.id}
-          className="flex items-center justify-between gap-4 rounded-lg border p-4 hover-elevate"
+          className="group flex items-center justify-between gap-4 rounded-lg border p-4 hover-elevate"
           data-testid={`session-${session.id}`}
         >
           <div className="flex items-center gap-3">
@@ -63,10 +98,26 @@ export function StudySessionList({ sessions, isLoading, compact = false }: Study
               </div>
             </div>
           </div>
-          <Badge variant="secondary" className="gap-1" data-testid={`session-hours-${session.id}`}>
-            <Clock className="h-3 w-3" />
-            {session.hours}h
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="gap-1" data-testid={`session-hours-${session.id}`}>
+              <Clock className="h-3 w-3" />
+              {session.hours}h
+            </Badge>
+            {!compact && (
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                <EditStudySessionDialog session={session} />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(session.id)}
+                  disabled={deletingId === session.id}
+                  data-testid={`button-delete-session-${session.id}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </div>

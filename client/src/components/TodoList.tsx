@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, Trash2, CheckSquare } from "lucide-react";
+import { EditTodoDialog } from "@/components/EditTodoDialog";
 
 interface TodoListProps {
   todos: Todo[];
@@ -170,16 +171,19 @@ export function TodoList({ todos, isLoading, compact = false }: TodoListProps) {
               >
                 {todo.task}
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(todo.id)}
-                disabled={deletingId === todo.id}
-                className="opacity-0 group-hover:opacity-100"
-                data-testid={`button-delete-todo-${todo.id}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <EditTodoDialog todo={todo} />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(todo.id)}
+                  disabled={deletingId === todo.id}
+                  className="opacity-0 group-hover:opacity-100"
+                  data-testid={`button-delete-todo-${todo.id}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))
         )}

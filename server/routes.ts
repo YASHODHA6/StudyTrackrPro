@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import {
   insertStudySessionSchema,
+  updateStudySessionSchema,
   insertTodoSchema,
+  updateTodoSchema,
   insertFeedbackSchema,
 } from "@shared/schema";
 
@@ -28,6 +30,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sessions);
     } catch (error: any) {
       res.status(500).json({ error: "Failed to fetch study sessions" });
+    }
+  });
+
+  // PUT /api/study/:id - Update a study session
+  app.put("/api/study/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateStudySessionSchema.parse(req.body);
+      const session = await storage.updateStudySession(id, validatedData);
+      
+      if (!session) {
+        return res.status(404).json({ error: "Study session not found" });
+      }
+      
+      res.json(session);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Invalid study session data" });
+    }
+  });
+
+  // DELETE /api/study/:id - Delete a study session
+  app.delete("/api/study/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteStudySession(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Study session not found" });
+      }
+      
+      res.json({ success: true, message: "Study session deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to delete study session" });
     }
   });
 
@@ -63,6 +98,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(todos);
     } catch (error: any) {
       res.status(500).json({ error: "Failed to fetch todos" });
+    }
+  });
+
+  // PUT /api/todo/:id - Update a todo
+  app.put("/api/todo/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateTodoSchema.parse(req.body);
+      const todo = await storage.updateTodo(id, validatedData);
+      
+      if (!todo) {
+        return res.status(404).json({ error: "Todo not found" });
+      }
+      
+      res.json(todo);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Invalid todo data" });
     }
   });
 

@@ -1,8 +1,10 @@
 import {
   type StudySession,
   type InsertStudySession,
+  type UpdateStudySession,
   type Todo,
   type InsertTodo,
+  type UpdateTodo,
   type Feedback,
   type InsertFeedback,
   type StudyStats,
@@ -20,11 +22,14 @@ export interface IStorage {
   // Study Sessions
   getAllStudySessions(): Promise<StudySession[]>;
   addStudySession(session: InsertStudySession): Promise<StudySession>;
+  updateStudySession(id: string, updates: UpdateStudySession): Promise<StudySession | undefined>;
+  deleteStudySession(id: string): Promise<boolean>;
   getStudyStats(): Promise<StudyStats>;
 
   // Todos
   getAllTodos(): Promise<Todo[]>;
   addTodo(todo: InsertTodo): Promise<Todo>;
+  updateTodo(id: string, updates: UpdateTodo): Promise<Todo | undefined>;
   deleteTodo(id: string): Promise<boolean>;
   toggleTodo(id: string): Promise<Todo | undefined>;
 
@@ -116,6 +121,29 @@ export class MemStorage implements IStorage {
     return session;
   }
 
+  async updateStudySession(id: string, updates: UpdateStudySession): Promise<StudySession | undefined> {
+    await this.loadData();
+    const session = this.sessions.get(id);
+    if (!session) return undefined;
+
+    const updatedSession: StudySession = {
+      ...session,
+      ...updates,
+    };
+    this.sessions.set(id, updatedSession);
+    await this.saveSessions();
+    return updatedSession;
+  }
+
+  async deleteStudySession(id: string): Promise<boolean> {
+    await this.loadData();
+    const deleted = this.sessions.delete(id);
+    if (deleted) {
+      await this.saveSessions();
+    }
+    return deleted;
+  }
+
   async getStudyStats(): Promise<StudyStats> {
     await this.loadData();
     const sessions = Array.from(this.sessions.values());
@@ -154,6 +182,20 @@ export class MemStorage implements IStorage {
     this.todos.set(id, todo);
     await this.saveTodos();
     return todo;
+  }
+
+  async updateTodo(id: string, updates: UpdateTodo): Promise<Todo | undefined> {
+    await this.loadData();
+    const todo = this.todos.get(id);
+    if (!todo) return undefined;
+
+    const updatedTodo: Todo = {
+      ...todo,
+      ...updates,
+    };
+    this.todos.set(id, updatedTodo);
+    await this.saveTodos();
+    return updatedTodo;
   }
 
   async deleteTodo(id: string): Promise<boolean> {

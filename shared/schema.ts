@@ -9,9 +9,11 @@ export const studySessionSchema = z.object({
 });
 
 export const insertStudySessionSchema = studySessionSchema.omit({ id: true });
+export const updateStudySessionSchema = insertStudySessionSchema.partial();
 
 export type StudySession = z.infer<typeof studySessionSchema>;
 export type InsertStudySession = z.infer<typeof insertStudySessionSchema>;
+export type UpdateStudySession = z.infer<typeof updateStudySessionSchema>;
 
 // Todo Schema
 export const todoSchema = z.object({
@@ -21,9 +23,14 @@ export const todoSchema = z.object({
 });
 
 export const insertTodoSchema = todoSchema.omit({ id: true });
+export const updateTodoSchema = z.object({
+  task: z.string().min(1, "Task is required").optional(),
+  completed: z.boolean().optional(),
+});
 
 export type Todo = z.infer<typeof todoSchema>;
 export type InsertTodo = z.infer<typeof insertTodoSchema>;
+export type UpdateTodo = z.infer<typeof updateTodoSchema>;
 
 // Feedback Schema
 export const feedbackSchema = z.object({
