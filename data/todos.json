@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "task": "November 4 cloud quiz",
+    "completed": false,
+    "id": "1005a98f-743b-41c5-abaa-cdb80779c8b0"
+  },
+  {
+    "task": "ON Friday we need to complete our presentation of cloud and coa",
+    "completed": false,
+    "id": "d390bacd-a5ac-4e56-aa1d-a251910131ce"
+  },
+  {
+    "task": "Prepare for OS midterm",
+    "completed": false,
+    "id": "2fbb5065-a5ee-4c22-8188-188b6e4325d0"
+  }
+]
